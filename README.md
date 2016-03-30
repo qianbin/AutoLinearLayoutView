@@ -1,5 +1,5 @@
 # AutoLinearLayoutView
-Auto-Layout based Linear Layout View for iOS8+ (iOS7?)
+Auto-Layout based Linear Layout View for iOS 8+ (iOS 7?)
 
 ##Screenshot
 
