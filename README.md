@@ -1,6 +1,12 @@
 # AutoLinearLayoutView
 Auto-Layout based Linear Layout View for iOS8+ (iOS7?)
 
+##Screenshot
+---
+<p align="center">
+  <img src="https://github.com/qianbin/AutoLinearLayoutView/blob/master/screenshot1.gif?raw=true"/>
+</p>
+
 ##Why AutoLinearLayoutView
 ---
 1. LinearLayout is the most powerful layout tool in Android. iOS needs a similar one
@@ -18,6 +24,3 @@ Auto-Layout based Linear Layout View for iOS8+ (iOS7?)
 ---
 Just copy and add *AutoLinearLayoutView*(.m .h) class into your project.
 
-##Screenshot
----
-![alt text](https://github.com/qianbin/AutoLinearLayoutView/blob/master/screenshot1.gif?raw=true "screenshot1")
