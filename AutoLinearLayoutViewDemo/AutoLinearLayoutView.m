@@ -230,6 +230,19 @@ IB_DESIGNABLE
 						      priorityPlus:(_alignTrailing ? 1 : 0) - priorityMinus
 							     addTo:consToAdd];
 
+				if (_alignCenterAgainstAxis) {
+					NSLayoutConstraint *cons = [NSLayoutConstraint constraintWithItem:sub
+												attribute:NSLayoutAttributeCenterX
+												relatedBy:NSLayoutRelationEqual
+												   toItem:self
+												attribute:NSLayoutAttributeCenterX
+											       multiplier:1
+												 constant: (_insets.left - _insets.right)/2];
+
+					cons.priority = PRIORITY_BASE + 2 - priorityMinus;
+					[consToAdd addObject:cons];
+				}
+
 			} else {
 				if (subViewSize.width > 0)
 					mySize.width += subViewSize.width;
@@ -283,6 +296,19 @@ IB_DESIGNABLE
 							  constant:_insets.bottom
 						      priorityPlus:(_alignBottom ? 1 : 0) - priorityMinus
 							     addTo:consToAdd];
+
+				if (_alignCenterAgainstAxis) {
+					NSLayoutConstraint *cons = [NSLayoutConstraint constraintWithItem:sub
+												attribute:NSLayoutAttributeCenterY
+												relatedBy:NSLayoutRelationEqual
+												   toItem:self
+												attribute:NSLayoutAttributeCenterY
+											       multiplier:1
+												 constant:(_insets.top - _insets.bottom)/2];
+
+					cons.priority = PRIORITY_BASE + 2 - priorityMinus;
+					[consToAdd addObject:cons];
+				}
 			}
 		}
 
@@ -396,4 +422,15 @@ IB_DESIGNABLE
 	[self setNeedsLayout];
 }
 
+- (void)setAlignCenterAgainstAxis:(BOOL)alignCenterAgainstAxis {
+	if (_alignCenterAgainstAxis == alignCenterAgainstAxis)
+		return;
+
+	_alignCenterAgainstAxis = alignCenterAgainstAxis;
+
+#if !TARGET_INTERFACE_BUILDER
+	[self setNeedsUpdateConstraints];
+#endif
+	[self setNeedsLayout];
+}
 @end

@@ -40,4 +40,5 @@
 @property(nonatomic) IBInspectable BOOL alignTrailing;
 @property(nonatomic) IBInspectable BOOL alignBottom;
 
+@property(nonatomic) IBInspectable BOOL alignCenterAgainstAxis;
 @end
