@@ -34,10 +34,14 @@
     }];
 }
 - (IBAction)toggleAlignment:(id)sender {
+    self.foobar.alignCenterAgainstAxis = !self.foobar.alignCenterAgainstAxis;
     if(self.foobar.axisVertical){
-        self.foobar.alignTrailing = !self.foobar.alignTrailing;
+        if(!self.foobar.alignCenterAgainstAxis)
+            self.foobar.alignTrailing = !self.foobar.alignTrailing;
+
     }else{
-        self.foobar.alignBottom = !self.foobar.alignBottom;
+        if(!self.foobar.alignCenterAgainstAxis)
+            self.foobar.alignBottom = !self.foobar.alignBottom;
     }
     
     [UIView animateWithDuration:0.5 animations:^{
