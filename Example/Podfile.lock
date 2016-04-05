@@ -9,6 +9,6 @@ EXTERNAL SOURCES:
     :path: ../
 
 SPEC CHECKSUMS:
-  AutoLinearLayoutView: 6f55bb43cb8bdb405c4427cf0b963988b09bef3c
+  AutoLinearLayoutView: 6c5c13ec8c3bfdb526f6bb869720dff8ecd28ecf
 
 COCOAPODS: 0.38.2
