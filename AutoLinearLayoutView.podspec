@@ -21,7 +21,7 @@ LinearLayout Linear UIStackView StackView
                        DESC
 
   s.homepage         = "https://github.com/qianbin/AutoLinearLayoutView"
-  s.screenshots     = "https://github.com/qianbin/AutoLinearLayoutView/blob/master/screenshot1.gif?raw=true", "https://github.com/qianbin/AutoLinearLayoutView/blob/master/screenshot2.png?raw=true"
+#  s.screenshots     = "https://raw.githubusercontent.com/qianbin/AutoLinearLayoutView/master/screenshot2.png"
   s.license          = 'MIT'
   s.author           = { "QianBin" => "cola.tin.com@gmail.com" }
   s.source           = { :git => "https://github.com/qianbin/AutoLinearLayoutView.git", :tag => s.version.to_s }

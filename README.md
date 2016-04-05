@@ -35,15 +35,15 @@ pod "AutoLinearLayoutView"
 ##Screenshots
 
 <p align="center">
-  <img src="https://github.com/qianbin/AutoLinearLayoutView/blob/master/screenshot1.gif?raw=true"/>
+  <img src="https://raw.githubusercontent.com/qianbin/AutoLinearLayoutView/master/screenshot1.gif"/>
 </p>
 ---
 <p align="center">
-  <img src="https://github.com/qianbin/AutoLinearLayoutView/blob/master/screenshot2.png?raw=true"/>
+  <img src="https://raw.githubusercontent.com/qianbin/AutoLinearLayoutView/master/screenshot2.png"/>
 </p>
 ---
 <p align="center">
-  <img src="https://github.com/qianbin/AutoLinearLayoutView/blob/master/screenshot3.png?raw=true"/>
+  <img src="https://raw.githubusercontent.com/qianbin/AutoLinearLayoutView/master/screenshot3.png"/>
 </p>
 
 ## Author
