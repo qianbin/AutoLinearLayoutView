@@ -1,30 +1,31 @@
 //
-//  ViewController.m
-//  AutoLinearLayoutViewDemo
+//  MHViewController.m
+//  AutoLinearLayoutView
 //
-//  Created by cola tin on 16/3/29.
-//  Copyright © 2016年 modoohut.com. All rights reserved.
+//  Created by 钱斌 on 04/06/2016.
+//  Copyright (c) 2016 钱斌. All rights reserved.
 //
 
-#import "ViewController.h"
-#import "AutoLinearLayoutView.h"
+#import "MHViewController.h"
 
-@interface ViewController ()
-
+@interface MHViewController ()
 @property (weak, nonatomic) IBOutlet AutoLinearLayoutView *foobar;
 @end
 
-@implementation ViewController
+@implementation MHViewController
 
-- (void)viewDidLoad {
+- (void)viewDidLoad
+{
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
+	// Do any additional setup after loading the view, typically from a nib.
 }
 
-- (void)didReceiveMemoryWarning {
+- (void)didReceiveMemoryWarning
+{
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
 
 - (IBAction)toggleAxis:(id)sender {
     self.foobar.axisVertical = !self.foobar.axisVertical;
@@ -38,7 +39,7 @@
     if(self.foobar.axisVertical){
         if(!self.foobar.alignCenterAgainstAxis)
             self.foobar.alignTrailing = !self.foobar.alignTrailing;
-
+        
     }else{
         if(!self.foobar.alignCenterAgainstAxis)
             self.foobar.alignBottom = !self.foobar.alignBottom;

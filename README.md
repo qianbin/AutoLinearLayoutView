@@ -1,9 +1,23 @@
 # AutoLinearLayoutView
-Auto-Layout based Linear Layout View for iOS 8+ (iOS 7?)
+Auto-Layout based Linear Layout View for iOS 7+
 
-##How to use
+[![CI Status](http://img.shields.io/travis/qianbin/AutoLinearLayoutView.svg?style=flat)](https://travis-ci.org/qianbin/AutoLinearLayoutView)
+[![Version](https://img.shields.io/cocoapods/v/AutoLinearLayoutView.svg?style=flat)](http://cocoapods.org/pods/AutoLinearLayoutView)
+[![License](https://img.shields.io/cocoapods/l/AutoLinearLayoutView.svg?style=flat)](http://cocoapods.org/pods/AutoLinearLayoutView)
+[![Platform](https://img.shields.io/cocoapods/p/AutoLinearLayoutView.svg?style=flat)](http://cocoapods.org/pods/AutoLinearLayoutView)
 
-Just copy and add *AutoLinearLayoutView*(.m .h) class into your project.
+## Usage
+
+To run the example project, clone the repo, and run `pod install` from the Example directory first.
+
+## Installation
+
+AutoLinearLayoutView is available through [CocoaPods](http://cocoapods.org). To install
+it, simply add the following line to your Podfile:
+
+```ruby
+pod "AutoLinearLayoutView"
+```
 
 ##Why AutoLinearLayoutView
 
@@ -27,7 +41,15 @@ Just copy and add *AutoLinearLayoutView*(.m .h) class into your project.
 <p align="center">
   <img src="https://github.com/qianbin/AutoLinearLayoutView/blob/master/screenshot2.png?raw=true"/>
 </p>
-
+---
 <p align="center">
   <img src="https://github.com/qianbin/AutoLinearLayoutView/blob/master/screenshot3.png?raw=true"/>
 </p>
+
+## Author
+
+QianBin, cola.tin.com@gmail.com
+
+## License
+
+AutoLinearLayoutView is available under the MIT license. See the LICENSE file for more info.
