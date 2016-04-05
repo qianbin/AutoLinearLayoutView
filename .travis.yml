@@ -11,3 +11,4 @@ language: objective-c
 script:
 - set -o pipefail && xcodebuild test -workspace Example/AutoLinearLayoutView.xcworkspace -scheme AutoLinearLayoutView-Example -sdk iphonesimulator ONLY_ACTIVE_ARCH=NO | xcpretty
 - pod lib lint
+
