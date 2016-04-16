@@ -359,6 +359,44 @@ IB_DESIGNABLE
 	[self setNeedsLayout];
 }
 
+- (void)setAlignTrailing:(BOOL)alignTrailing {
+	if (_alignTrailing == alignTrailing)
+		return;
+
+	_alignTrailing = alignTrailing;
+
+#if !TARGET_INTERFACE_BUILDER
+	[self setNeedsUpdateConstraints];
+#endif
+	[self setNeedsLayout];
+}
+- (void)setAlignBottom:(BOOL)alignBottom {
+	if (_alignBottom == alignBottom)
+		return;
+
+	_alignBottom = alignBottom;
+
+#if !TARGET_INTERFACE_BUILDER
+	[self setNeedsUpdateConstraints];
+#endif
+	[self setNeedsLayout];
+}
+
+- (void)setAlignCenterAgainstAxis:(BOOL)alignCenterAgainstAxis {
+	if (_alignCenterAgainstAxis == alignCenterAgainstAxis)
+		return;
+
+	_alignCenterAgainstAxis = alignCenterAgainstAxis;
+
+#if !TARGET_INTERFACE_BUILDER
+	[self setNeedsUpdateConstraints];
+#endif
+	[self setNeedsLayout];
+}
+@end
+
+@implementation AutoLinearLayoutView (SeparatedInsets)
+
 - (CGFloat)insetLeading {
 	return _insets.left;
 }
@@ -399,38 +437,4 @@ IB_DESIGNABLE
 	self.insets = insets;
 }
 
-- (void)setAlignTrailing:(BOOL)alignTrailing {
-	if (_alignTrailing == alignTrailing)
-		return;
-
-	_alignTrailing = alignTrailing;
-
-#if !TARGET_INTERFACE_BUILDER
-	[self setNeedsUpdateConstraints];
-#endif
-	[self setNeedsLayout];
-}
-- (void)setAlignBottom:(BOOL)alignBottom {
-	if (_alignBottom == alignBottom)
-		return;
-
-	_alignBottom = alignBottom;
-
-#if !TARGET_INTERFACE_BUILDER
-	[self setNeedsUpdateConstraints];
-#endif
-	[self setNeedsLayout];
-}
-
-- (void)setAlignCenterAgainstAxis:(BOOL)alignCenterAgainstAxis {
-	if (_alignCenterAgainstAxis == alignCenterAgainstAxis)
-		return;
-
-	_alignCenterAgainstAxis = alignCenterAgainstAxis;
-
-#if !TARGET_INTERFACE_BUILDER
-	[self setNeedsUpdateConstraints];
-#endif
-	[self setNeedsLayout];
-}
 @end

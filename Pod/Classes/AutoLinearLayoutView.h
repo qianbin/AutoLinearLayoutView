@@ -30,15 +30,17 @@
 
 @property(nonatomic) IBInspectable BOOL axisVertical;
 
-@property(nonatomic) IBInspectable CGFloat insetLeading;
-@property(nonatomic) IBInspectable CGFloat insetTrailing;
-@property(nonatomic) IBInspectable CGFloat insetTop;
-@property(nonatomic) IBInspectable CGFloat insetBottom;
-
-@property(nonatomic) IBInspectable CGFloat spacing;
-
 @property(nonatomic) IBInspectable BOOL alignTrailing;
 @property(nonatomic) IBInspectable BOOL alignBottom;
 
 @property(nonatomic) IBInspectable BOOL alignCenterAgainstAxis;
+
+@property(nonatomic) IBInspectable CGFloat spacing;
+@end
+
+@interface AutoLinearLayoutView (SeparatedInsets)
+@property(nonatomic) IBInspectable CGFloat insetLeading;
+@property(nonatomic) IBInspectable CGFloat insetTrailing;
+@property(nonatomic) IBInspectable CGFloat insetTop;
+@property(nonatomic) IBInspectable CGFloat insetBottom;
 @end
