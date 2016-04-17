@@ -105,7 +105,7 @@
                                                             </userDefinedRuntimeAttribute>
                                                         </userDefinedRuntimeAttributes>
                                                     </view>
-                                                    <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="RBf-Uw-97W" customClass="AutoLinearLayoutView">
+                                                    <view contentMode="scaleToFill" horizontalCompressionResistancePriority="950" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="RBf-Uw-97W" customClass="AutoLinearLayoutView">
                                                         <rect key="frame" x="166" y="193.5" width="236.5" height="84"/>
                                                         <subviews>
                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Foo" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MoF-td-5dQ">
