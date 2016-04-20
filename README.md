@@ -35,7 +35,7 @@ pod "AutoLinearLayoutView"
 ##Screenshots
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/qianbin/AutoLinearLayoutView/master/screenshot1.gif"/>
+  <img src="https://raw.githubusercontent.com/qianbin/AutoLinearLayoutView/master/screenshot4.gif"/>
 </p>
 ---
 <p align="center">
