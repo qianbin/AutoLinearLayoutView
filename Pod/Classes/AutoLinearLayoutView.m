@@ -95,13 +95,40 @@ static BOOL isValidIntrinsicContentSize(CGSize size) { return !(size.width < 0 |
 IB_DESIGNABLE
 @implementation AutoLinearLayoutView
 
+- (void)_invalidateConstraintsAndLayout {
+#if !TARGET_INTERFACE_BUILDER
+	[self setNeedsUpdateConstraints];
+#endif
+
+	// traverse superviews and invalidate those are AutoLinearLayoutView
+	UIView *superView = self.superview;
+	while (superView) {
+		if ([superView isKindOfClass:AutoLinearLayoutView.class]) {
+#if !TARGET_INTERFACE_BUILDER
+			[superView setNeedsUpdateConstraints];
+#endif
+			[superView setNeedsLayout];
+		}
+		superView = superView.superview;
+	}
+
+	[self setNeedsLayout];
+}
+
 #if !TARGET_INTERFACE_BUILDER
 - (void)didAddSubview:(UIView *)subview {
 	[super didAddSubview:subview];
 	// as an auto layout fan ...
 	subview.translatesAutoresizingMaskIntoConstraints = NO;
+
+	[self _invalidateConstraintsAndLayout];
 }
 #endif
+
+- (void)willRemoveSubview:(UIView *)subview {
+	[super willRemoveSubview:subview];
+	[self _invalidateConstraintsAndLayout];
+}
 
 - (void)addConstraint:(NSLayoutConstraint *)constraint {
 	// skip prototype constraints added by IB
@@ -111,7 +138,22 @@ IB_DESIGNABLE
 	[super addConstraint:constraint];
 }
 
+- (NSInteger)nestingDepth {
+	NSInteger depth = 0;
+	UIView *view = self.superview;
+	while (view) {
+		if ([view isKindOfClass:AutoLinearLayoutView.class])
+			++depth;
+		view = view.superview;
+	}
+	return depth;
+}
+
 - (void)updateConstraints {
+
+	static CGFloat const CONSTRAINT_PRIORITY_NESTING_DECREASE = 0.01;
+	static CGFloat const CONSTRAINT_PRIORITY_ALIGNMENT_INCREASE = 0.001;
+	static CGFloat const CONSTRAINT_PRIORITY_SPACING_INCREASE = 0.002;
 
 	if (_addedConstraints) {
 		[self removeConstraints:_addedConstraints];
@@ -123,6 +165,8 @@ IB_DESIGNABLE
 
 	NSArray<UIView *> *subviews = self.subviews;
 	if (subviews.count > 0) {
+
+		const CGFloat priorityDecrease = [self nestingDepth] * CONSTRAINT_PRIORITY_NESTING_DECREASE;
 
 		CGFloat minHorizHugging = UILayoutPriorityRequired;
 		CGFloat minVertHugging = UILayoutPriorityRequired;
@@ -142,8 +186,8 @@ IB_DESIGNABLE
 			  [constraintsToAdd addObject:equal];
 			  [constraintsToAdd addObject:greater];
 
-			  greater.priority = CONSTRAINT_PRIORITY_STRONG;
 			  equal.priority = CONSTRAINT_PRIORITY_WEAK;
+			  greater.priority = CONSTRAINT_PRIORITY_STRONG;
 
 			  if (equal.firstAttribute == NSLayoutAttributeLeading || equal.firstAttribute == NSLayoutAttributeTrailing) {
 				  if ((_axisVertical ? horizHugging : minHorizHugging) < CONSTRAINT_PRIORITY_WEAK)
@@ -155,20 +199,19 @@ IB_DESIGNABLE
 
 			  if (equal.firstAttribute != equal.secondAttribute) {
 				  // spacing
-				  ++equal.priority;
-				  ++greater.priority;
+				  equal.priority += CONSTRAINT_PRIORITY_SPACING_INCREASE;
+				  greater.priority += CONSTRAINT_PRIORITY_SPACING_INCREASE;
 			  } else {
 				  // insets
-				  BOOL isHorizConstraint =
-				      (equal.firstAttribute == NSLayoutAttributeLeading || equal.firstAttribute == NSLayoutAttributeTrailing);
-				  if (_alignCenterAgainstAxis && (_axisVertical == isHorizConstraint)) {
-					  //
-				  } else if (equal.firstAttribute == (_alignTrailing ? NSLayoutAttributeTrailing : NSLayoutAttributeLeading) ||
-					     equal.firstAttribute == (_alignBottom ? NSLayoutAttributeBottom : NSLayoutAttributeTop)) {
-					  ++equal.priority;
-					  ++greater.priority;
+				  if (equal.firstAttribute == (_alignTrailing ? NSLayoutAttributeTrailing : NSLayoutAttributeLeading) ||
+				      equal.firstAttribute == (_alignBottom ? NSLayoutAttributeBottom : NSLayoutAttributeTop)) {
+
+					  equal.priority += CONSTRAINT_PRIORITY_ALIGNMENT_INCREASE;
+					  greater.priority += CONSTRAINT_PRIORITY_ALIGNMENT_INCREASE;
 				  }
 			  }
+			  equal.priority -= priorityDecrease;
+			  greater.priority -= priorityDecrease;
 			};
 
 			{
@@ -235,14 +278,8 @@ IB_DESIGNABLE
 											 multiplier:1
 											   constant:constant];
 
-				center.priority = CONSTRAINT_PRIORITY_WEAK + 1;
+				center.priority = CONSTRAINT_PRIORITY_STRONG + CONSTRAINT_PRIORITY_ALIGNMENT_INCREASE * 2 - priorityDecrease;
 				[constraintsToAdd addObject:center];
-			}
-
-			if ([sub isKindOfClass:AutoLinearLayoutView.class]) {
-				// important before we measure size of sub view
-				[sub setNeedsUpdateConstraints];
-				[sub updateConstraintsIfNeeded];
 			}
 
 			// measure
@@ -257,15 +294,14 @@ IB_DESIGNABLE
 			mySize.height = _axisVertical ? (mySize.height + subViewSize.height) : MAX(mySize.height, MAX(subViewSize.height, 0));
 		}
 
-		mySize.width += (_insets.left + _insets.right);
-		mySize.height += (_insets.top + _insets.bottom);
-
 		CGFloat totalSpacing = _spacing * (subviews.count - 1);
 		if (_axisVertical)
 			mySize.height += totalSpacing;
 		else
 			mySize.width += totalSpacing;
 	}
+	mySize.width += (_insets.left + _insets.right);
+	mySize.height += (_insets.top + _insets.bottom);
 
 	// simulate intrinsic content size to get hugging and compression work
 	[constraintsToAdd addObjectsFromArray:[NSLayoutConstraint _constraintsWithContentSize:mySize ofView:self]];
@@ -281,10 +317,7 @@ IB_DESIGNABLE
 		return;
 
 	_axisVertical = axisVertical;
-#if !TARGET_INTERFACE_BUILDER
-	[self setNeedsUpdateConstraints];
-#endif
-	[self setNeedsLayout];
+	[self _invalidateConstraintsAndLayout];
 }
 
 - (void)setInsets:(UIEdgeInsets)insets {
@@ -292,10 +325,7 @@ IB_DESIGNABLE
 		return;
 
 	_insets = insets;
-#if !TARGET_INTERFACE_BUILDER
-	[self setNeedsUpdateConstraints];
-#endif
-	[self setNeedsLayout];
+	[self _invalidateConstraintsAndLayout];
 }
 
 - (void)setSpacing:(CGFloat)spacing {
@@ -303,11 +333,7 @@ IB_DESIGNABLE
 		return;
 
 	_spacing = spacing;
-
-#if !TARGET_INTERFACE_BUILDER
-	[self setNeedsUpdateConstraints];
-#endif
-	[self setNeedsLayout];
+	[self _invalidateConstraintsAndLayout];
 }
 
 - (void)setAlignTrailing:(BOOL)alignTrailing {
@@ -315,22 +341,14 @@ IB_DESIGNABLE
 		return;
 
 	_alignTrailing = alignTrailing;
-
-#if !TARGET_INTERFACE_BUILDER
-	[self setNeedsUpdateConstraints];
-#endif
-	[self setNeedsLayout];
+	[self _invalidateConstraintsAndLayout];
 }
 - (void)setAlignBottom:(BOOL)alignBottom {
 	if (_alignBottom == alignBottom)
 		return;
 
 	_alignBottom = alignBottom;
-
-#if !TARGET_INTERFACE_BUILDER
-	[self setNeedsUpdateConstraints];
-#endif
-	[self setNeedsLayout];
+	[self _invalidateConstraintsAndLayout];
 }
 
 - (void)setAlignCenterAgainstAxis:(BOOL)alignCenterAgainstAxis {
@@ -338,11 +356,7 @@ IB_DESIGNABLE
 		return;
 
 	_alignCenterAgainstAxis = alignCenterAgainstAxis;
-
-#if !TARGET_INTERFACE_BUILDER
-	[self setNeedsUpdateConstraints];
-#endif
-	[self setNeedsLayout];
+	[self _invalidateConstraintsAndLayout];
 }
 @end
 
