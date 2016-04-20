@@ -18,6 +18,7 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
+    srand((int)time(NULL));
 }
 
 - (void)didReceiveMemoryWarning
@@ -26,6 +27,29 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (IBAction)addSubView:(UIButton*)sender {
+    static NSString * const text = @"AutoLinearLayoutView";
+    const NSUInteger subviewCount = self.foobar.subviews.count;
+    CGPoint point = [sender convertPoint:CGPointMake(sender.bounds.size.width/2, sender.bounds.size.height/2) toView:self.foobar];
+    UILabel * label = [[UILabel alloc]initWithFrame:CGRectMake(point.x, point.y, 0, 0)];
+    label.text = [text substringWithRange:NSMakeRange(subviewCount% text.length, 1)];
+    label.font = [UIFont systemFontOfSize: MAX(14.0, rand() % 100)];
+    label.backgroundColor = [UIColor colorWithHue:self.foobar.subviews.count % 7 / 7.0 saturation:1 brightness:1 alpha:1];
+    [self.foobar addSubview:label];
+    [UIView animateWithDuration:0.3 animations:^{
+        [self.view layoutIfNeeded];
+    }];
+}
+
+- (IBAction)clearSubView:(id)sender {
+    for(UIView * sub in self.foobar.subviews){
+        [sub removeFromSuperview];
+    }
+    [UIView animateWithDuration:0.3 animations:^{
+        [self.view layoutIfNeeded];
+    }];
+
+}
 
 - (IBAction)toggleAxis:(id)sender {
     self.foobar.axisVertical = !self.foobar.axisVertical;
