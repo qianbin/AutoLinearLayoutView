@@ -28,63 +28,77 @@ static CGFloat const CONSTRAINT_PRIORITY_WEAK = 100;
 static CGFloat const CONSTRAINT_PRIORITY_MEDIUM = 500;
 static CGFloat const CONSTRAINT_PRIORITY_STRONG = 900;
 
-@implementation NSLayoutConstraint (Helper)
 // make a pair of Equal and GreaterThanOrEqual constraints
-+ (void)_makeEqualAndGreaterConstraintsWithItem:(UIView *)view1
-				      attribute:(NSLayoutAttribute)attr1
-					 toItem:(UIView *)view2
-				      attribute:(NSLayoutAttribute)attr2
-				       constant:(CGFloat)c
-				     usingBlock:(void (^)(NSLayoutConstraint *equal, NSLayoutConstraint *greater))block {
-	block(
-	    [NSLayoutConstraint constraintWithItem:view1 attribute:attr1 relatedBy:NSLayoutRelationEqual toItem:view2 attribute:attr2 multiplier:1 constant:c],
-	    [NSLayoutConstraint constraintWithItem:view1
-					 attribute:attr1
-					 relatedBy:NSLayoutRelationGreaterThanOrEqual
-					    toItem:view2
-					 attribute:attr2
-					multiplier:1
-					  constant:c]);
+static void makeEqualAndGreaterConstraints(UIView *view1, NSLayoutAttribute attr1, UIView *view2, NSLayoutAttribute attr2, CGFloat constant,
+					   void (^block)(NSLayoutConstraint *equal, NSLayoutConstraint *greater)) {
+	NSLayoutConstraint *equal = [NSLayoutConstraint constraintWithItem:view1
+								 attribute:attr1
+								 relatedBy:NSLayoutRelationEqual
+								    toItem:view2
+								 attribute:attr2
+								multiplier:1
+								  constant:constant];
+	NSLayoutConstraint *greater = [NSLayoutConstraint constraintWithItem:view1
+								   attribute:attr1
+								   relatedBy:NSLayoutRelationGreaterThanOrEqual
+								      toItem:view2
+								   attribute:attr2
+								  multiplier:1
+								    constant:constant];
+
+	block(equal, greater);
 }
 
 // make constraints for a view to simulate intrinsic content size
-+ (NSArray<NSLayoutConstraint *> *)_constraintsWithContentSize:(CGSize)size ofView:(UIView *)view {
+static NSArray<NSLayoutConstraint *> *makeSizeConstraints(UIView *view, CGSize size) {
 	NSMutableArray<NSLayoutConstraint *> *constraints = [NSMutableArray arrayWithCapacity:4];
 
 	// for width
-	[self _makeEqualAndGreaterConstraintsWithItem:view
-					    attribute:NSLayoutAttributeWidth
-					       toItem:nil
-					    attribute:NSLayoutAttributeNotAnAttribute
-					     constant:size.width
-					   usingBlock:^(NSLayoutConstraint *equal, NSLayoutConstraint *greater) {
-
-					     equal.priority = [view contentHuggingPriorityForAxis:UILayoutConstraintAxisHorizontal];
-					     greater.priority = [view contentCompressionResistancePriorityForAxis:UILayoutConstraintAxisHorizontal];
-					     [constraints addObject:equal];
-					     [constraints addObject:greater];
-					   }];
+	makeEqualAndGreaterConstraints(view, NSLayoutAttributeWidth, nil, NSLayoutAttributeNotAnAttribute, size.width,
+				       ^(NSLayoutConstraint *equal, NSLayoutConstraint *greater) {
+					 equal.priority = [view contentHuggingPriorityForAxis:UILayoutConstraintAxisHorizontal];
+					 greater.priority = [view contentCompressionResistancePriorityForAxis:UILayoutConstraintAxisHorizontal];
+					 [constraints addObject:equal];
+					 [constraints addObject:greater];
+				       });
 
 	// for height
-	[self _makeEqualAndGreaterConstraintsWithItem:view
-					    attribute:NSLayoutAttributeHeight
-					       toItem:nil
-					    attribute:NSLayoutAttributeNotAnAttribute
-					     constant:size.height
-					   usingBlock:^(NSLayoutConstraint *equal, NSLayoutConstraint *greater) {
-
-					     equal.priority = [view contentHuggingPriorityForAxis:UILayoutConstraintAxisVertical];
-					     greater.priority = [view contentCompressionResistancePriorityForAxis:UILayoutConstraintAxisVertical];
-					     [constraints addObject:equal];
-					     [constraints addObject:greater];
-					   }];
-
+	makeEqualAndGreaterConstraints(view, NSLayoutAttributeHeight, nil, NSLayoutAttributeNotAnAttribute, size.height,
+				       ^(NSLayoutConstraint *equal, NSLayoutConstraint *greater) {
+					 equal.priority = [view contentHuggingPriorityForAxis:UILayoutConstraintAxisVertical];
+					 greater.priority = [view contentCompressionResistancePriorityForAxis:UILayoutConstraintAxisVertical];
+					 [constraints addObject:equal];
+					 [constraints addObject:greater];
+				       });
 	return constraints;
 }
 
-@end
-
 static BOOL isValidIntrinsicContentSize(CGSize size) { return !(size.width < 0 || size.height < 0); }
+
+static void invalidateConstraintsAndLayout(UIView *view) {
+
+	// traverse superviews and invalidate those are AutoLinearLayoutView
+	while (view) {
+		if ([view isKindOfClass:AutoLinearLayoutView.class]) {
+#if !TARGET_INTERFACE_BUILDER
+			[view setNeedsUpdateConstraints];
+#endif
+			[view setNeedsLayout];
+		}
+		view = view.superview;
+	}
+}
+
+static NSInteger nestingDepth(UIView *view) {
+	NSInteger depth = 0;
+	view = view.superview;
+	while (view) {
+		if ([view isKindOfClass:AutoLinearLayoutView.class])
+			++depth;
+		view = view.superview;
+	}
+	return depth;
+}
 
 ///////
 @interface AutoLinearLayoutView () {
@@ -94,40 +108,19 @@ static BOOL isValidIntrinsicContentSize(CGSize size) { return !(size.width < 0 |
 
 IB_DESIGNABLE
 @implementation AutoLinearLayoutView
-
-- (void)_invalidateConstraintsAndLayout {
-#if !TARGET_INTERFACE_BUILDER
-	[self setNeedsUpdateConstraints];
-#endif
-
-	// traverse superviews and invalidate those are AutoLinearLayoutView
-	UIView *superView = self.superview;
-	while (superView) {
-		if ([superView isKindOfClass:AutoLinearLayoutView.class]) {
-#if !TARGET_INTERFACE_BUILDER
-			[superView setNeedsUpdateConstraints];
-#endif
-			[superView setNeedsLayout];
-		}
-		superView = superView.superview;
-	}
-
-	[self setNeedsLayout];
-}
-
 #if !TARGET_INTERFACE_BUILDER
 - (void)didAddSubview:(UIView *)subview {
 	[super didAddSubview:subview];
 	// as an auto layout fan ...
 	subview.translatesAutoresizingMaskIntoConstraints = NO;
 
-	[self _invalidateConstraintsAndLayout];
+	invalidateConstraintsAndLayout(self);
 }
 #endif
 
 - (void)willRemoveSubview:(UIView *)subview {
 	[super willRemoveSubview:subview];
-	[self _invalidateConstraintsAndLayout];
+	invalidateConstraintsAndLayout(self);
 }
 
 - (void)addConstraint:(NSLayoutConstraint *)constraint {
@@ -136,17 +129,6 @@ IB_DESIGNABLE
 		return;
 
 	[super addConstraint:constraint];
-}
-
-- (NSInteger)nestingDepth {
-	NSInteger depth = 0;
-	UIView *view = self.superview;
-	while (view) {
-		if ([view isKindOfClass:AutoLinearLayoutView.class])
-			++depth;
-		view = view.superview;
-	}
-	return depth;
 }
 
 - (void)updateConstraints {
@@ -166,7 +148,7 @@ IB_DESIGNABLE
 	NSArray<UIView *> *subviews = self.subviews;
 	if (subviews.count > 0) {
 
-		const CGFloat priorityDecrease = [self nestingDepth] * CONSTRAINT_PRIORITY_NESTING_DECREASE;
+		const CGFloat priorityDecrease = nestingDepth(self) * CONSTRAINT_PRIORITY_NESTING_DECREASE;
 
 		CGFloat minHorizHugging = UILayoutPriorityRequired;
 		CGFloat minVertHugging = UILayoutPriorityRequired;
@@ -217,53 +199,28 @@ IB_DESIGNABLE
 			{
 				// make constraints for insets against axis
 				NSLayoutAttribute attribute = _axisVertical ? NSLayoutAttributeLeading : NSLayoutAttributeTop;
-				[NSLayoutConstraint _makeEqualAndGreaterConstraintsWithItem:sub
-										  attribute:attribute
-										     toItem:self
-										  attribute:attribute
-										   constant:(_axisVertical ? _insets.left : _insets.top)
-										 usingBlock:block];
+				makeEqualAndGreaterConstraints(sub, attribute, self, attribute, (_axisVertical ? _insets.left : _insets.top), block);
 			}
 			{
 				// make constraints for insets against axis
 				NSLayoutAttribute attribute = _axisVertical ? NSLayoutAttributeTrailing : NSLayoutAttributeBottom;
-				[NSLayoutConstraint _makeEqualAndGreaterConstraintsWithItem:self
-										  attribute:attribute
-										     toItem:sub
-										  attribute:attribute
-										   constant:(_axisVertical ? _insets.right : _insets.bottom)
-										 usingBlock:block];
+				makeEqualAndGreaterConstraints(self, attribute, sub, attribute, (_axisVertical ? _insets.right : _insets.bottom), block);
 			}
 
 			if (sub == subviews.firstObject) {
 				// make constraints for first sub view with me
 				NSLayoutAttribute attribute = _axisVertical ? NSLayoutAttributeTop : NSLayoutAttributeLeading;
-				[NSLayoutConstraint _makeEqualAndGreaterConstraintsWithItem:sub
-										  attribute:attribute
-										     toItem:self
-										  attribute:attribute
-										   constant:(_axisVertical ? _insets.top : _insets.left)
-										 usingBlock:block];
+				makeEqualAndGreaterConstraints(sub, attribute, self, attribute, (_axisVertical ? _insets.top : _insets.left), block);
 			} else {
 				// make constraints for spacing between sub views
-				[NSLayoutConstraint
-				    _makeEqualAndGreaterConstraintsWithItem:sub
-								  attribute:(_axisVertical ? NSLayoutAttributeTop : NSLayoutAttributeLeading)
-								     toItem:subviews[i - 1]
-								  attribute:(_axisVertical ? NSLayoutAttributeBottom : NSLayoutAttributeTrailing)
-								   constant:_spacing
-								 usingBlock:block];
+				makeEqualAndGreaterConstraints(sub, (_axisVertical ? NSLayoutAttributeTop : NSLayoutAttributeLeading), subviews[i - 1],
+							       (_axisVertical ? NSLayoutAttributeBottom : NSLayoutAttributeTrailing), _spacing, block);
 			}
 
 			if (sub == subviews.lastObject) {
 				// make constraints for last sub view with me
 				NSLayoutAttribute attribute = _axisVertical ? NSLayoutAttributeBottom : NSLayoutAttributeTrailing;
-				[NSLayoutConstraint _makeEqualAndGreaterConstraintsWithItem:self
-										  attribute:attribute
-										     toItem:sub
-										  attribute:attribute
-										   constant:(_axisVertical ? _insets.bottom : _insets.right)
-										 usingBlock:block];
+				makeEqualAndGreaterConstraints(self, attribute, sub, attribute, (_axisVertical ? _insets.bottom : _insets.right), block);
 			}
 
 			if (_alignCenterAgainstAxis) {
@@ -287,7 +244,7 @@ IB_DESIGNABLE
 
 			if (!isValidIntrinsicContentSize(sub.intrinsicContentSize) && ![sub isKindOfClass:AutoLinearLayoutView.class]) {
 				// to simulate intrinsic content size for sub view that has no intrinsic content size
-				[constraintsToAdd addObjectsFromArray:[NSLayoutConstraint _constraintsWithContentSize:subViewSize ofView:sub]];
+				[constraintsToAdd addObjectsFromArray:makeSizeConstraints(sub, subViewSize)];
 			}
 
 			mySize.width = _axisVertical ? MAX(subViewSize.width, mySize.width) : (mySize.width + MAX(subViewSize.width, 0));
@@ -304,7 +261,7 @@ IB_DESIGNABLE
 	mySize.height += (_insets.top + _insets.bottom);
 
 	// simulate intrinsic content size to get hugging and compression work
-	[constraintsToAdd addObjectsFromArray:[NSLayoutConstraint _constraintsWithContentSize:mySize ofView:self]];
+	[constraintsToAdd addObjectsFromArray:makeSizeConstraints(self, mySize)];
 
 	[self addConstraints:constraintsToAdd];
 	_addedConstraints = constraintsToAdd;
@@ -317,7 +274,7 @@ IB_DESIGNABLE
 		return;
 
 	_axisVertical = axisVertical;
-	[self _invalidateConstraintsAndLayout];
+	invalidateConstraintsAndLayout(self);
 }
 
 - (void)setInsets:(UIEdgeInsets)insets {
@@ -325,7 +282,7 @@ IB_DESIGNABLE
 		return;
 
 	_insets = insets;
-	[self _invalidateConstraintsAndLayout];
+	invalidateConstraintsAndLayout(self);
 }
 
 - (void)setSpacing:(CGFloat)spacing {
@@ -333,7 +290,7 @@ IB_DESIGNABLE
 		return;
 
 	_spacing = spacing;
-	[self _invalidateConstraintsAndLayout];
+	invalidateConstraintsAndLayout(self);
 }
 
 - (void)setAlignTrailing:(BOOL)alignTrailing {
@@ -341,14 +298,14 @@ IB_DESIGNABLE
 		return;
 
 	_alignTrailing = alignTrailing;
-	[self _invalidateConstraintsAndLayout];
+	invalidateConstraintsAndLayout(self);
 }
 - (void)setAlignBottom:(BOOL)alignBottom {
 	if (_alignBottom == alignBottom)
 		return;
 
 	_alignBottom = alignBottom;
-	[self _invalidateConstraintsAndLayout];
+	invalidateConstraintsAndLayout(self);
 }
 
 - (void)setAlignCenterAgainstAxis:(BOOL)alignCenterAgainstAxis {
@@ -356,7 +313,7 @@ IB_DESIGNABLE
 		return;
 
 	_alignCenterAgainstAxis = alignCenterAgainstAxis;
-	[self _invalidateConstraintsAndLayout];
+	invalidateConstraintsAndLayout(self);
 }
 @end
 
