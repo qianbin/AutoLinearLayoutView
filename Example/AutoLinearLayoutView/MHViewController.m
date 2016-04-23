@@ -35,7 +35,16 @@
     label.text = [text substringWithRange:NSMakeRange(subviewCount% text.length, 1)];
     label.font = [UIFont systemFontOfSize: MAX(14.0, rand() % 100)];
     label.backgroundColor = [UIColor colorWithHue:self.foobar.subviews.count % 7 / 7.0 saturation:1 brightness:1 alpha:1];
+    [label addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(subViewDidTap:)]];
+    label.userInteractionEnabled = YES;
     [self.foobar addSubview:label];
+    [UIView animateWithDuration:0.3 animations:^{
+        [self.view layoutIfNeeded];
+    }];
+}
+                                
+- (void)subViewDidTap:(UIGestureRecognizer *)recognizer {
+    [recognizer.view removeFromSuperview];
     [UIView animateWithDuration:0.3 animations:^{
         [self.view layoutIfNeeded];
     }];
