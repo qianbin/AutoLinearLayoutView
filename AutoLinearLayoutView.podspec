@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "AutoLinearLayoutView"
-  s.version          = "0.1.0"
+  s.version          = "0.2.0"
   s.summary          = "Auto-Layout based LinearLayout View."
 
 # This description is used to generate tags and improve search results.
@@ -21,7 +21,7 @@ LinearLayout Linear UIStackView StackView
                        DESC
 
   s.homepage         = "https://github.com/qianbin/AutoLinearLayoutView"
-#  s.screenshots     = "https://raw.githubusercontent.com/qianbin/AutoLinearLayoutView/master/screenshot2.png"
+  s.screenshots     = "https://raw.githubusercontent.com/qianbin/AutoLinearLayoutView/master/screenshot4.gif"
   s.license          = 'MIT'
   s.author           = { "QianBin" => "cola.tin.com@gmail.com" }
   s.source           = { :git => "https://github.com/qianbin/AutoLinearLayoutView.git", :tag => s.version.to_s }
