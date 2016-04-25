@@ -115,7 +115,7 @@ IB_DESIGNABLE
 	const Class NSIBPrototypingLayoutConstraint_ = NSClassFromString(@"NSIBPrototypingLayoutConstraint");
 
 	// skip prototyping constraints added to sub views by IB
-	const NSMutableArray<NSLayoutConstraint *> *constraintsToSkip = [NSMutableArray array];
+	NSMutableArray<NSLayoutConstraint *> *constraintsToSkip = [NSMutableArray array];
 	for (NSLayoutConstraint *constraint in self.constraints) {
 		if ([constraint isKindOfClass:NSIBPrototypingLayoutConstraint_])
 			[constraintsToSkip addObject:constraint];
