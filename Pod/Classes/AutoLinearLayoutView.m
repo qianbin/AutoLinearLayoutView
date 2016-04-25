@@ -108,6 +108,30 @@ static NSInteger nestingDepth(UIView *view) {
 
 IB_DESIGNABLE
 @implementation AutoLinearLayoutView
+
+- (void)awakeFromNib {
+	[super awakeFromNib];
+
+	const Class NSIBPrototypingLayoutConstraint_ = NSClassFromString(@"NSIBPrototypingLayoutConstraint");
+
+	// skip prototyping constraints added to sub views by IB
+	const NSMutableArray<NSLayoutConstraint *> *constraintsToSkip = [NSMutableArray array];
+	for (NSLayoutConstraint *constraint in self.constraints) {
+		if ([constraint isKindOfClass:NSIBPrototypingLayoutConstraint_])
+			[constraintsToSkip addObject:constraint];
+	}
+	[self removeConstraints:constraintsToSkip];
+
+	[constraintsToSkip removeAllObjects];
+
+	// skip prototyping constraints added to self by IB
+	for (NSLayoutConstraint *constraint in self.superview.constraints) {
+		if ((constraint.firstItem == self || constraint.secondItem == self) && [constraint isKindOfClass:NSIBPrototypingLayoutConstraint_])
+			[constraintsToSkip addObject:constraint];
+	}
+	[self.superview removeConstraints:constraintsToSkip];
+}
+
 #if !TARGET_INTERFACE_BUILDER
 - (void)didAddSubview:(UIView *)subview {
 	[super didAddSubview:subview];
@@ -121,14 +145,6 @@ IB_DESIGNABLE
 - (void)willRemoveSubview:(UIView *)subview {
 	[super willRemoveSubview:subview];
 	invalidateConstraintsAndLayout(self);
-}
-
-- (void)addConstraint:(NSLayoutConstraint *)constraint {
-	// skip prototype constraints added by IB
-	if ([@"NSIBPrototypingLayoutConstraint" isEqualToString:NSStringFromClass(constraint.class)])
-		return;
-
-	[super addConstraint:constraint];
 }
 
 - (void)updateConstraints {
