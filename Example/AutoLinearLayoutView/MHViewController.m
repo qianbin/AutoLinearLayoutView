@@ -10,6 +10,7 @@
 
 @interface MHViewController ()
 @property (weak, nonatomic) IBOutlet AutoLinearLayoutView *foobar;
+@property (weak, nonatomic) IBOutlet UISegmentedControl *alignment;
 @end
 
 @implementation MHViewController
@@ -33,8 +34,8 @@
     CGPoint point = [sender convertPoint:CGPointMake(sender.bounds.size.width/2, sender.bounds.size.height/2) toView:self.foobar];
     UILabel * label = [[UILabel alloc]initWithFrame:CGRectMake(point.x, point.y, 0, 0)];
     label.text = [text substringWithRange:NSMakeRange(subviewCount% text.length, 1)];
-    label.font = [UIFont systemFontOfSize: MAX(14.0, rand() % 100)];
-    label.backgroundColor = [UIColor colorWithHue:self.foobar.subviews.count % 7 / 7.0 saturation:1 brightness:1 alpha:1];
+    label.font = [UIFont systemFontOfSize: MAX(30.0, rand() % 100)];
+    label.backgroundColor = [UIColor colorWithHue:self.foobar.subviews.count % 10 / 10.0 saturation:1 brightness:1 alpha:1];
     [label addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(subViewDidTap:)]];
     label.userInteractionEnabled = YES;
     [self.foobar addSubview:label];
@@ -60,22 +61,41 @@
 
 }
 
-- (IBAction)toggleAxis:(id)sender {
-    self.foobar.axisVertical = !self.foobar.axisVertical;
+- (IBAction)axisDidChanged:(UISegmentedControl *)sender {
+    if(sender.selectedSegmentIndex == 1){
+        self.foobar.axisVertical = YES;
+        [UIView animateWithDuration:0.5 animations:^{
+            [self.view layoutIfNeeded];
+        }];
+        [self.alignment setTitle:@"Leading" forSegmentAtIndex:0];
+        [self.alignment setTitle:@"Trailing" forSegmentAtIndex:1];
+    }
+    else{
+        self.foobar.axisVertical = NO;
+        [UIView animateWithDuration:0.5 animations:^{
+            [self.view layoutIfNeeded];
+        }];
+        [self.alignment setTitle:@"Top" forSegmentAtIndex:0];
+        [self.alignment setTitle:@"Bottom" forSegmentAtIndex:1];
+    }
+    [self.view layoutIfNeeded];
+    [self alignmentDidChanged:self.alignment];
     
-    [UIView animateWithDuration:0.5 animations:^{
-        [self.view layoutIfNeeded];
-    }];
 }
-- (IBAction)toggleAlignment:(id)sender {
-    self.foobar.alignCenterAgainstAxis = !self.foobar.alignCenterAgainstAxis;
-    if(self.foobar.axisVertical){
-        if(!self.foobar.alignCenterAgainstAxis)
-            self.foobar.alignTrailing = !self.foobar.alignTrailing;
-        
-    }else{
-        if(!self.foobar.alignCenterAgainstAxis)
-            self.foobar.alignBottom = !self.foobar.alignBottom;
+
+- (IBAction)alignmentDidChanged:(UISegmentedControl *)sender {
+    self.foobar.alignTrailing = NO;
+    self.foobar.alignBottom = NO;
+    self.foobar.alignCenterAgainstAxis = NO;
+    
+    if(sender.selectedSegmentIndex == 1){
+        if(self.foobar.axisVertical)
+            self.foobar.alignTrailing = YES;
+        else
+            self.foobar.alignBottom = YES;
+        self.foobar.alignBottom = YES;
+    }else if(sender.selectedSegmentIndex == 2){
+        self.foobar.alignCenterAgainstAxis = YES;
     }
     
     [UIView animateWithDuration:0.5 animations:^{
