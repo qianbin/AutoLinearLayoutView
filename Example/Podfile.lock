@@ -1,5 +1,5 @@
 PODS:
-  - AutoLinearLayoutView (0.1.0)
+  - AutoLinearLayoutView (0.2.0)
 
 DEPENDENCIES:
   - AutoLinearLayoutView (from `../`)
@@ -9,6 +9,6 @@ EXTERNAL SOURCES:
     :path: ../
 
 SPEC CHECKSUMS:
-  AutoLinearLayoutView: 6c5c13ec8c3bfdb526f6bb869720dff8ecd28ecf
+  AutoLinearLayoutView: 1370d70257b925f4eccb3356d3092132ce613df6
 
-COCOAPODS: 0.38.2
+COCOAPODS: 0.39.0
